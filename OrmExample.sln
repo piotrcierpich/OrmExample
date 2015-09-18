@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmExample", "OrmExample\OrmExample.csproj", "{489015A2-CEF9-45CC-9D75-10D95BBA9D41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmExample.Mapping", "OrmExample.Mapping\OrmExample.Mapping.csproj", "{5236B7B5-CCAF-460B-A8B9-E85D144EC796}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkExample", "EntityFrameworkExample\EntityFrameworkExample.csproj", "{74C19995-9F62-4162-9898-52D353885F7E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C2C8E6AF-D352-4C5A-BF67-433AB8AC94B6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrmExample.Entities", "OrmExample.Entities\OrmExample.Entities.csproj", "{C8CA7A97-E29F-4ED8-8436-3658A2087918}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{489015A2-CEF9-45CC-9D75-10D95BBA9D41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{489015A2-CEF9-45CC-9D75-10D95BBA9D41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{489015A2-CEF9-45CC-9D75-10D95BBA9D41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{489015A2-CEF9-45CC-9D75-10D95BBA9D41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5236B7B5-CCAF-460B-A8B9-E85D144EC796}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5236B7B5-CCAF-460B-A8B9-E85D144EC796}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5236B7B5-CCAF-460B-A8B9-E85D144EC796}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5236B7B5-CCAF-460B-A8B9-E85D144EC796}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74C19995-9F62-4162-9898-52D353885F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74C19995-9F62-4162-9898-52D353885F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74C19995-9F62-4162-9898-52D353885F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74C19995-9F62-4162-9898-52D353885F7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8CA7A97-E29F-4ED8-8436-3658A2087918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8CA7A97-E29F-4ED8-8436-3658A2087918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8CA7A97-E29F-4ED8-8436-3658A2087918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8CA7A97-E29F-4ED8-8436-3658A2087918}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
