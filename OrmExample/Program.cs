@@ -22,7 +22,7 @@ namespace OrmExample
             IEnumerable<Product> blastProducts = mappingContext.GetProductMapper().GetByName("blast");
             IEnumerable<Product> allProducts = mappingContext.GetProductMapper().GetAll();
 
-            Product kryptonite = new Product{Name = "Triple blast", Price = 120.0m };
+            Product kryptonite = new Product{Name = "Next generation blast", Price = 999.0m };
             mappingContext.GetProductMapper().Insert(kryptonite);
 
             Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };

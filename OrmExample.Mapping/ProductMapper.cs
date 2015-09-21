@@ -60,7 +60,7 @@ namespace OrmExample.Mapping
             return products;
         }
 
-        private const string insertInto = "INSERT INTO Products (Name, Price) VALUES (@Name, @Price)";
+        private const string insertInto = "INSERT INTO Products (Name, Price) OUTPUT INSERTED.Id VALUES (@Name, @Price)";
 
         public void Insert(Product product)
         {
@@ -69,7 +69,7 @@ namespace OrmExample.Mapping
             SqlCommand command = new SqlCommand(insertInto, connection);
             command.Parameters.Add(new SqlParameter("Name", product.Name));
             command.Parameters.Add(new SqlParameter("Price", product.Price));
-            command.ExecuteNonQuery();
+            product.Id = (int)command.ExecuteScalar();
             connection.Close();
         }
 
