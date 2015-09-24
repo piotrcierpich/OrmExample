@@ -19,7 +19,7 @@ namespace OrmExample.Mapping
 
         public ClientMapper GetClientMapper()
         {
-            return new ClientMapper(new DsRetriever(connectionString));
+            return new ClientMapper(new DsRetriever(connectionString), connectionString);
         }
 
         public ProductMapper GetProductMapper()

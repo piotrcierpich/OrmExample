@@ -14,16 +14,31 @@ namespace OrmExample
         {
             //Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };
             
+            // add UPDATE 
+
             MappingContext mappingContext = new MappingContext("ormExample");
             Client client = mappingContext.GetClientMapper().GetById(1);
+            IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
 
-            Product product = mappingContext.GetProductMapper().GetById(2); 
+            Client clientToUpdate = mappingContext.GetClientMapper().GetById(2);
+            clientToUpdate.Name += " what?";
+            mappingContext.GetClientMapper().Update(clientToUpdate);
+
+            Client newClient = new Client {Name = "John malkovic", Address = "NY Brooklyn"};
+            mappingContext.GetClientMapper().Insert(newClient);
+
+            Product product = mappingContext.GetProductMapper().GetById(2);
+
+            product.Name += " improved!";
+            mappingContext.GetProductMapper().Update(product);
 
             IEnumerable<Product> blastProducts = mappingContext.GetProductMapper().GetByName("blast");
             IEnumerable<Product> allProducts = mappingContext.GetProductMapper().GetAll();
 
             Product kryptonite = new Product{Name = "Next generation blast", Price = 999.0m };
             mappingContext.GetProductMapper().Insert(kryptonite);
+
+
 
             Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };
             Product doubleBlast = new Product { Id = 2, Name = "Double blast", Price = 40.0m };

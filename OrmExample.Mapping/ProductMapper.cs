@@ -94,5 +94,19 @@ namespace OrmExample.Mapping
             }
             return products;
         }
+
+        private const string UpdateQuery = "UPDATE Products SET Name = @Name, Price = @Price WHERE Id = @Id";
+
+        public void Update(Product product)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            SqlCommand command = new SqlCommand(UpdateQuery, connection);
+            command.Parameters.Add(new SqlParameter("Name", product.Name));
+            command.Parameters.Add(new SqlParameter("Price", product.Price));
+            command.Parameters.Add(new SqlParameter("Id", product.Id));
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
     }
 }
