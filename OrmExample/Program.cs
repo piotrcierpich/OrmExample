@@ -17,7 +17,7 @@ namespace OrmExample
             // add UPDATE 
 
             MappingContext mappingContext = new MappingContext("ormExample");
-            Client client = mappingContext.GetClientMapper().GetById(1);
+            Client client = mappingContext.GetClientMapper().GetById(3);
             IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
 
             Client clientToUpdate = mappingContext.GetClientMapper().GetById(2);

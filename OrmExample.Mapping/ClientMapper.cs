@@ -1,35 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OrmExample.Mapping
 {
     public class ClientMapper
     {
-        private readonly DsRetriever dsRetriever;
         private readonly string connectionString;
-        private const string QueryString = "SELECT [Id], [Name], [Address] FROM [Clients] WHERE Id = {0}";
+        private const string QueryString = "SELECT [Id], [Name], [Address] FROM [Clients] WHERE Id = @Id";
 
-        public ClientMapper(DsRetriever dsRetriever, string connectionString)
+        public ClientMapper(string connectionString)
         {
-            this.dsRetriever = dsRetriever;
             this.connectionString = connectionString;
         }
 
         public Client GetById(int id)
         {
-            string queryCmd = string.Format(QueryString, id);
-            DataTable dt = dsRetriever.GetDataForQuery(queryCmd);
-
-            Client client = new Client();
-            client.Id = (int) dt.Rows[0][0];
-            client.Name = (string) dt.Rows[0][1];
-            client.Address = (string) dt.Rows[0][2];
-            return client;
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            SqlCommand command = new SqlCommand(QueryString, connection);
+            command.Parameters.Add(new SqlParameter("Id", id));
+            using (SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection))
+            {
+                dataReader.Read();
+                Client client = new Client();
+                client.Id = dataReader.GetInt32(0);
+                client.Name = dataReader.GetString(1);
+                client.Address = dataReader.GetString(2);
+                return client;
+            }
         }
 
         private const string getAllQuery = "SELECT [Id], [Name], [Address] FROM [Clients]";

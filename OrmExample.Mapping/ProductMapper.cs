@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OrmExample.Mapping
 {
     public class ProductMapper
     {
-        private readonly DsRetriever dsRetriever;
         private readonly string connectionString;
         private const string queryById = "SELECT Id, Name, Price FROM Products WHERE Id = @Id";
 
-        public ProductMapper(DsRetriever dsRetriever, string connectionString)
+        public ProductMapper(string connectionString)
         {
-            this.dsRetriever = dsRetriever;
             this.connectionString = connectionString;
         }
 

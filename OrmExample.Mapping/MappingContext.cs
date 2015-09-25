@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
 namespace OrmExample.Mapping
 {
@@ -19,12 +13,12 @@ namespace OrmExample.Mapping
 
         public ClientMapper GetClientMapper()
         {
-            return new ClientMapper(new DsRetriever(connectionString), connectionString);
+            return new ClientMapper(connectionString);
         }
 
         public ProductMapper GetProductMapper()
         {
-            return new ProductMapper(new DsRetriever(connectionString), connectionString);
+            return new ProductMapper(connectionString);
         }
     }
 }
