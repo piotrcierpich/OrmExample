@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OrmExample.Mapping;
 
 namespace OrmExample
 {
@@ -139,7 +140,7 @@ namespace OrmExample
         public DateTime DayDate { get; set; }
     }
 
-    public class Product
+    public class Product : IEntity
     {
         public override bool Equals(object obj)
         {

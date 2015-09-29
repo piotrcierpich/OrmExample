@@ -16,9 +16,9 @@ namespace OrmExample.Mapping
             return new ClientMapper(connectionString);
         }
 
-        public ProductMapper GetProductMapper()
+        public ProductMapperConcrete GetProductMapper()
         {
-            return new ProductMapper(connectionString);
+            return new ProductMapperConcrete(connectionString);
         }
     }
 }

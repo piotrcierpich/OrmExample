@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OrmExample;
 
 namespace EntityFrameworkExample
@@ -15,7 +13,11 @@ namespace EntityFrameworkExample
             Product rocketFuel = new Product { Name = "Rocket fuel", Price = 25.0m };
             Product doubleBlast = new Product { Name = "Double blast", Price = 40.0m };
             Product tripleBlast = new Product { Name = "Triple blast", Price = 40.0m };
+            
             PromoContext dbContext = new PromoContext();
+
+            IEnumerable<Product> products = dbContext.Products.ToArray();
+            var asd = products.ToArray();
             //dbContext.Products.Add(rocketFuel);
             //dbContext.Products.Add(doubleBlast);
             dbContext.Products.Add(tripleBlast);
