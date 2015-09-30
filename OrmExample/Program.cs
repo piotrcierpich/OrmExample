@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OrmExample.Entities;
 using OrmExample.Mapping;
 
 namespace OrmExample
@@ -13,19 +14,17 @@ namespace OrmExample
         static void Main(string[] args)
         {
             //Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };
-            
-            // add UPDATE 
 
             MappingContext mappingContext = new MappingContext("ormExample");
-            //Client client = mappingContext.GetClientMapper().GetById(2);
-            //IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
+            Client client = mappingContext.GetClientMapper().GetById(2);
+            IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
 
-            //Client clientToUpdate = mappingContext.GetClientMapper().GetById(2);
-            //clientToUpdate.Name += " what?";
-            //mappingContext.GetClientMapper().Update(clientToUpdate);
+            Client clientToUpdate = mappingContext.GetClientMapper().GetById(2);
+            clientToUpdate.Name += " what?";
+            mappingContext.GetClientMapper().Update(clientToUpdate);
 
-            //Client newClient = new Client {Name = "John malkovic", Address = "NY Brooklyn"};
-            //mappingContext.GetClientMapper().Insert(newClient);
+            Client newClient = new Client { Name = "John malkovic", Address = "NY Brooklyn" };
+            mappingContext.GetClientMapper().Insert(newClient);
 
             Product product = mappingContext.GetProductMapper().GetById(2);
 

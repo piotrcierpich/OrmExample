@@ -11,9 +11,9 @@ namespace OrmExample.Mapping
             connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
         }
 
-        public ClientMapper GetClientMapper()
+        public ClientMapperConcrete GetClientMapper()
         {
-            return new ClientMapper(connectionString);
+            return new ClientMapperConcrete(connectionString);
         }
 
         public ProductMapperConcrete GetProductMapper()

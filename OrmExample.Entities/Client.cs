@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OrmExample.Mapping;
 
-namespace OrmExample
+namespace OrmExample.Entities
 {
-    public class Client
+    public class Client : IEntity
     {
         public Client()
         {
