@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OrmExample.Entities;
 using OrmExample.Mapping;
+using System.Diagnostics;
 
 namespace OrmExample
 {
@@ -13,9 +14,11 @@ namespace OrmExample
     {
         static void Main(string[] args)
         {
-            //Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };
+            //TestDelete();
 
+            TestIdentityMap();
             MappingContext mappingContext = new MappingContext("ormExample");
+
             Client client = mappingContext.GetClientMapper().GetById(2);
             IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
 
@@ -76,6 +79,28 @@ namespace OrmExample
             Console.WriteLine("rocket fuel regular price ${0}, discounted price only ${1}!", regularPrice, discountedPrice);
 
             Console.ReadKey();
+        }
+
+        private static void TestDelete()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            var productAt3 = mappingContext.GetProductMapper().GetAll().Skip(2).First();
+            //mappingContext.GetClientMapper().DeleteById(productAt3.Id);
+            mappingContext.GetClientMapper().DeleteById(10);
+            var all = mappingContext.GetClientMapper().GetAll();
+        }
+
+        private static void TestIdentityMap()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Client autocenter = new Client() {Address = "Garncarska 13 Krakow", Name = "Auto center"};
+            mappingContext.GetClientMapper().Insert(autocenter);
+            Client autoCenterFromDb = mappingContext.GetClientMapper().GetById(autocenter.Id);
+            Debug.Assert(autoCenterFromDb.GetHashCode() == autocenter.GetHashCode(), "identity map fails");
+
+            Client firstClientAt3 = mappingContext.GetClientMapper().GetById(3);
+            Client secondClientAt3 = mappingContext.GetClientMapper().GetById(3);
+            Debug.Assert(firstClientAt3.GetHashCode() == secondClientAt3.GetHashCode(), "identity map fails");
         }
     }
 }

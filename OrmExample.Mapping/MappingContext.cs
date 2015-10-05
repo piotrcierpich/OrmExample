@@ -4,21 +4,24 @@ namespace OrmExample.Mapping
 {
     public class MappingContext
     {
-        private readonly string connectionString;
+        private readonly ClientMapper clientMapper;
+        private readonly ProductMapper productMapper;
 
         public MappingContext(string connectionStringName)
         {
-            connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            string connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
+            clientMapper = new ClientMapper(connectionString);
+            productMapper = new ProductMapper(connectionString);
         }
 
-        public ClientMapperConcrete GetClientMapper()
+        public ClientMapper GetClientMapper()
         {
-            return new ClientMapperConcrete(connectionString);
+            return clientMapper;
         }
 
-        public ProductMapperConcrete GetProductMapper()
+        public ProductMapper GetProductMapper()
         {
-            return new ProductMapperConcrete(connectionString);
+            return productMapper;
         }
     }
 }

@@ -11,16 +11,21 @@ namespace OrmExample.Mapping
         private const string GetAllQueryTemplate = "SELECT {0} FROM {1}";
         private const string InsertIntoTemplate = "INSERT INTO {0} ({1}) OUTPUT INSERTED.Id VALUES {2}";
         private const string UpdateQueryTemplate = "UPDATE {0} SET {1} WHERE Id = @Id";
+        private const string DeleteTemplate = "DELETE FROM {0} WHERE Id = @Id";
 
+        private readonly Dictionary<int, T> identityMap = new Dictionary<int, T>(); 
         private readonly string connectionString;
 
-        public BaseMapper(string connectionString)
+        protected BaseMapper(string connectionString)
         {
             this.connectionString = connectionString;
         }
 
         public T GetById(int id)
         {
+            if (identityMap.ContainsKey(id))
+                return identityMap[id];
+
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
             string queryById = string.Format(QueryByIdTemplate, BuildColumnsWithId(), TableName);
@@ -29,7 +34,9 @@ namespace OrmExample.Mapping
             using (SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 dataReader.Read();
-                return Load(id, dataReader);
+                T entity = Load(id, dataReader);
+                identityMap[id] = entity;
+                return entity;
             }
         }
 
@@ -44,7 +51,17 @@ namespace OrmExample.Mapping
             {
                 while (dataReader.Read())
                 {
-                    T entity = Load((int)dataReader["Id"], dataReader);
+                    int id = (int) dataReader["Id"];
+                    T entity;
+                    if (identityMap.ContainsKey(id))
+                    {
+                        entity = identityMap[id];
+                    }
+                    else
+                    {
+                        entity = Load(id, dataReader);
+                        identityMap.Add(id, entity);
+                    }
                     entities.Add(entity);
                 }
             }
@@ -59,6 +76,7 @@ namespace OrmExample.Mapping
             SqlCommand command = new SqlCommand(insertIntoQuery, connection);
             command.Parameters.AddRange(ModifyParameters(entity));
             entity.Id = (int)command.ExecuteScalar();
+            identityMap.Add(entity.Id, entity);
             connection.Close();
         }
 
@@ -71,6 +89,18 @@ namespace OrmExample.Mapping
             command.Parameters.Add(new SqlParameter("Id", entity.Id));
             command.Parameters.AddRange(ModifyParameters(entity));
             command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        public void DeleteById(int id)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            string deleteQuery = string.Format(DeleteTemplate, TableName);
+            SqlCommand command = new SqlCommand(deleteQuery, connection);
+            command.Parameters.Add(new SqlParameter("Id", id));
+            command.ExecuteNonQuery();
+            identityMap.Remove(id);
             connection.Close();
         }
 

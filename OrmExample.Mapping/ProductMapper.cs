@@ -3,9 +3,9 @@ using OrmExample.Entities;
 
 namespace OrmExample.Mapping
 {
-    public class ProductMapperConcrete : BaseMapper<Product>
+    public class ProductMapper : BaseMapper<Product>
     {
-        public ProductMapperConcrete(string connectionString)
+        public ProductMapper(string connectionString)
             : base(connectionString)
         { }
 
