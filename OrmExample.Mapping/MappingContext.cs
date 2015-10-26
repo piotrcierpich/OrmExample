@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using OrmExample.Entities;
 
 namespace OrmExample.Mapping
 {
@@ -14,12 +15,12 @@ namespace OrmExample.Mapping
             productMapper = new ProductMapper(connectionString);
         }
 
-        public ClientMapper GetClientMapper()
+        public BaseMapper<Client> GetClientMapper()
         {
             return clientMapper;
         }
 
-        public ProductMapper GetProductMapper()
+        public BaseMapper<Product> GetProductMapper()
         {
             return productMapper;
         }
