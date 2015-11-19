@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Data.SqlClient;
 using OrmExample.Entities;
 
 namespace OrmExample.Mapping
