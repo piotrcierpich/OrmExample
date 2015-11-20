@@ -16,12 +16,12 @@ namespace OrmExample.Mapping
             productMapper = new ProductMapper(connectionString);
         }
 
-        public BaseMapper<Client> GetClientMapper()
+        public IMapper<Client> GetClientMapper()
         {
             return clientMapper;
         }
 
-        public BaseMapper<Product> GetProductMapper()
+        public IMapper<Product> GetProductMapper()
         {
             return productMapper;
         }

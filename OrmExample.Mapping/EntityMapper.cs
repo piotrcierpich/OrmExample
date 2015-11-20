@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OrmExample.Mapping
 {
-    public class BaseMapper<T> where T : IEntity
+    public class EntityMapper
     {
         private const string QueryByIdTemplate = "SELECT {0} FROM {1} WHERE Id = @Id";
         private const string GetAllQueryTemplate = "SELECT {0} FROM {1}";
@@ -14,17 +14,17 @@ namespace OrmExample.Mapping
         private const string UpdateQueryTemplate = "UPDATE {0} SET {1} WHERE Id = @Id";
         private const string DeleteTemplate = "DELETE FROM {0} WHERE Id = @Id";
 
-        private readonly Dictionary<int, T> identityMap = new Dictionary<int, T>();
+        private readonly Dictionary<int, IEntity> identityMap = new Dictionary<int, IEntity>();
         private readonly string connectionString;
         private readonly IMapping mapping;
 
-        protected BaseMapper(string connectionString, IMapping mapping)
+        public EntityMapper(string connectionString, IMapping mapping)
         {
             this.connectionString = connectionString;
             this.mapping = mapping;
         }
 
-        public T GetById(int id)
+        public IEntity GetById(int id)
         {
             if (identityMap.ContainsKey(id))
                 return identityMap[id];
@@ -37,32 +37,32 @@ namespace OrmExample.Mapping
             using (SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 dataReader.Read();
-                T entity = (T)mapping.Load(id, dataReader);
+                IEntity entity = mapping.Load(id, dataReader);
                 identityMap[id] = entity;
                 return entity;
             }
         }
 
-        public IEnumerable<T> GetAll()
+        public IEnumerable GetAll()
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
             string getAllQuery = string.Format(GetAllQueryTemplate, BuildColumnsWithId(), mapping.TableName);
             SqlCommand command = new SqlCommand(getAllQuery, connection);
-            List<T> entities = new List<T>();
+            ArrayList entities = new ArrayList();
             using (SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection))
             {
                 while (dataReader.Read())
                 {
                     int id = (int)dataReader["Id"];
-                    T entity;
+                    IEntity entity;
                     if (identityMap.ContainsKey(id))
                     {
                         entity = identityMap[id];
                     }
                     else
                     {
-                        entity = (T)mapping.Load(id, dataReader);
+                        entity = mapping.Load(id, dataReader);
                         identityMap.Add(id, entity);
                     }
                     entities.Add(entity);
@@ -71,7 +71,7 @@ namespace OrmExample.Mapping
             return entities;
         }
 
-        public void Insert(T entity)
+        public void Insert(IEntity entity)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
@@ -83,7 +83,7 @@ namespace OrmExample.Mapping
             connection.Close();
         }
 
-        public void Update(T entity)
+        public void Update(IEntity entity)
         {
             SqlConnection connection = new SqlConnection(connectionString);
             connection.Open();
