@@ -40,11 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseMapper.cs" />
-    <Compile Include="ClientMapper.cs" />
-    <Compile Include="DsRetriever.cs" />
-    <Compile Include="MappingContext.cs" />
-    <Compile Include="ProductMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OrmExample.Entities;
 using OrmExample.Mapping;
 using System.Diagnostics;
@@ -12,39 +9,34 @@ namespace OrmExample
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            //TestDelete();
-
             TestIdentityMap();
-            MappingContext mappingContext = new MappingContext("ormExample");
+            TestUow();
 
-            Client client = mappingContext.GetClientMapper().GetById(2);
-            IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
+            TestGetClients();
+            TestClientUpdate();
 
-            Client clientToUpdate = mappingContext.GetClientMapper().GetById(2);
-            clientToUpdate.Name += " what?";
-            mappingContext.GetClientMapper().Update(clientToUpdate);
+            TestClientInsert();
 
-            Client newClient = new Client { Name = "John malkovic", Address = "NY Brooklyn" };
-            mappingContext.GetClientMapper().Insert(newClient);
+            TestProductUpdate();
 
-            Product product = mappingContext.GetProductMapper().GetById(2);
+            TestProductsGet();
 
-            product.Name += " improved!";
-            mappingContext.GetProductMapper().Update(product);
+            TestProductInsert();
 
-            //IEnumerable<Product> blastProducts = mappingContext.GetProductMapper().GetByName("blast");
-            IEnumerable<Product> allProducts = mappingContext.GetProductMapper().GetAll();
+            DomainTest();
+        }
 
-            Product kryptonite = new Product{Name = "Next generation blast", Price = 999.0m };
-            mappingContext.GetProductMapper().Insert(kryptonite);
-
-
-
-            Product rocketFuel = new Product { Id = 1, Name = "Rocket fuel", Price = 25.0m };
-            Product doubleBlast = new Product { Id = 2, Name = "Double blast", Price = 40.0m };
-            Discount rocketFuelDiscount = new Discount { Product = rocketFuel, DiscountPolicy = new PromoDay { DayDate = DateTime.Today, DiscountPercentage = new Percentage(20)} };
+        private static void DomainTest()
+        {
+            Product rocketFuel = new Product {Id = 1, Name = "Rocket fuel", Price = 25.0m};
+            Product doubleBlast = new Product {Id = 2, Name = "Double blast", Price = 40.0m};
+            Discount rocketFuelDiscount = new Discount
+                {
+                    Product = rocketFuel,
+                    DiscountPolicy = new PromoDay {DayDate = DateTime.Today, DiscountPercentage = new Percentage(20)}
+                };
             Client josephDeer = new Client
                 {
                     Name = "Joseph Deer",
@@ -59,7 +51,7 @@ namespace OrmExample
                         new DiscountUntilExpired
                             {
                                 DiscountPercentage = new Percentage(50),
-                                FromTo = new DateSpan { StartDate = DateTime.Today, EndDate = DateTime.Today.AddDays(2) }
+                                FromTo = new DateSpan {StartDate = DateTime.Today, EndDate = DateTime.Today.AddDays(2)}
                             }
                 };
             josephDeer.Offer(doubleBlastAccount);
@@ -81,6 +73,55 @@ namespace OrmExample
             Console.ReadKey();
         }
 
+        private static void TestProductsGet()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            IEnumerable<Product> allProducts = mappingContext.GetProductMapper().GetAll();
+        }
+
+        private static void TestProductInsert()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Product kryptonite = new Product {Name = "Next generation blast", Price = 999.0m};
+            mappingContext.GetProductMapper().Insert(kryptonite);
+        }
+
+        private static void TestProductUpdate()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Product product = mappingContext.GetProductMapper().GetById(2);
+            product.Name += " improved!";
+            mappingContext.GetProductMapper().Update(product);
+        }
+
+        private static void TestClientInsert()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Client newClient = new Client {Name = "John malkovic", Address = "NY Brooklyn"};
+            mappingContext.GetClientMapper().Insert(newClient);
+        }
+
+        private static void TestClientUpdate()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Client clientToUpdate = mappingContext.GetClientMapper().GetById(5);
+            clientToUpdate.Name += " what?";
+            mappingContext.GetClientMapper().Update(clientToUpdate);
+        }
+
+        private static void TestGetClients()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            Client client = mappingContext.GetClientMapper().GetById(2);
+            IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
+        }
+
+        private static void TestUow()
+        {
+            MappingContext mappingContext = new MappingContext("ormExample");
+            //mappingContext.SaveChanges();
+        }
+
         private static void TestDelete()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
@@ -98,8 +139,8 @@ namespace OrmExample
             Client autoCenterFromDb = mappingContext.GetClientMapper().GetById(autocenter.Id);
             Debug.Assert(autoCenterFromDb.GetHashCode() == autocenter.GetHashCode(), "identity map fails");
 
-            Client firstClientAt3 = mappingContext.GetClientMapper().GetById(3);
-            Client secondClientAt3 = mappingContext.GetClientMapper().GetById(3);
+            Client firstClientAt3 = mappingContext.GetClientMapper().GetById(2);
+            Client secondClientAt3 = mappingContext.GetClientMapper().GetById(2);
             Debug.Assert(firstClientAt3.GetHashCode() == secondClientAt3.GetHashCode(), "identity map fails");
         }
     }

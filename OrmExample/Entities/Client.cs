@@ -5,7 +5,7 @@ using OrmExample.Mapping;
 
 namespace OrmExample.Entities
 {
-    public class Client : IEntity
+    public class Client : EntityInUow
     {
         public Client()
         {
@@ -30,7 +30,6 @@ namespace OrmExample.Entities
             return Offers.FirstOrDefault(offering => offering.Product.Equals(product));
         }
 
-        public int Id { get; set; }
         public ICollection<Discount> Offers { get; set; }
         public string Name { get; set; }
         public string Address { get; set; }
@@ -138,7 +137,7 @@ namespace OrmExample.Entities
         public DateTime DayDate { get; set; }
     }
 
-    public class Product : IEntity
+    public class Product : EntityInUow
     {
         public override bool Equals(object obj)
         {
@@ -147,12 +146,6 @@ namespace OrmExample.Entities
             return other.Id == Id;
         }
 
-        public override int GetHashCode()
-        {
-            return Id;
-        }
-
-        public int Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
     }
