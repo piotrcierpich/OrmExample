@@ -133,17 +133,17 @@ namespace Orm.Tests
                 connection.Open();
                 SqlCommand command = new SqlCommand("SELECT Name, Address FROM Clients", connection);
                 IDataReader dr = command.ExecuteReader();
-                while (dr.Read())
+                if (dr.Read())
                 {
                     string name = dr.GetString(0);
                     Assert.AreEqual("Jack Daniels", name);
                     string address = dr.GetString(1);
                     Assert.AreEqual("Rynek 5, Krakow", address);
                 }
-                //else
-                //{
-                //    Assert.Fail("No data found");
-                //}
+                else
+                {
+                    Assert.Fail("No data found");
+                }
                 dr.Close();
             }
         }
