@@ -119,7 +119,11 @@ namespace OrmExample
         private static void TestUow()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            //mappingContext.SaveChanges();
+            Client c1 = mappingContext.GetClientMapper().GetById(1);
+            c1.Name += "UOW modified";
+            mappingContext.SaveChanges();
+            Client c2 = mappingContext.GetClientMapper().GetById(1);
+            Debug.Assert(c2.Name.Contains("UOW modified"));
         }
 
         private static void TestDelete()
@@ -136,6 +140,8 @@ namespace OrmExample
             MappingContext mappingContext = new MappingContext("ormExample");
             Client autocenter = new Client() {Address = "Garncarska 13 Krakow", Name = "Auto center"};
             mappingContext.GetClientMapper().Insert(autocenter);
+            mappingContext.SaveChanges();
+            // TODO cannot use ID as the entity has not been inserted yet maybe mappingContext.SaveChanged()
             Client autoCenterFromDb = mappingContext.GetClientMapper().GetById(autocenter.Id);
             Debug.Assert(autoCenterFromDb.GetHashCode() == autocenter.GetHashCode(), "identity map fails");
 

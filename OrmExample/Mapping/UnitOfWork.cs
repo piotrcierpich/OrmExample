@@ -21,9 +21,9 @@ namespace OrmExample.Mapping
         public void RegisterNew(IEntity entity)
         {
             Debug.Assert(entity.Id == 0);
-            Debug.Assert(dirtyObjects.Contains(entity), "registered as dirty");
-            Debug.Assert(removedObjects.Contains(entity), "registered as to remove");
-            Debug.Assert(!removedObjects.Contains(entity), "already registered as new");
+            Debug.Assert(dirtyObjects.Contains(entity) == false, "registered as dirty");
+            Debug.Assert(removedObjects.Contains(entity) == false, "registered as to remove");
+            Debug.Assert(newObjects.Contains(entity) == false, "already registered as new");
             newObjects.Add(entity);
         }
 
@@ -41,6 +41,9 @@ namespace OrmExample.Mapping
 
         public void RegisterDirty(IEntity entity)
         {
+            Debug.Assert(removedObjects.Contains(entity) == false, "Object to be removed should not be marked as dirty");
+            if (entity.Id == 0)
+                return;
             if (dirtyObjects.Contains(entity))
                 return;
             if (newObjects.Contains(entity))
@@ -61,6 +64,7 @@ namespace OrmExample.Mapping
             {
                 MapperRegistry.GetMapper(newObject.GetType()).Insert(newObject);
             }
+            newObjects.Clear();
         }
 
         private void UpdateDirty()
@@ -78,26 +82,34 @@ namespace OrmExample.Mapping
                 MapperRegistry.GetMapper(removedObject.GetType()).DeleteById(removedObject.Id);
             }
         }
+
+        //[Conditional("Tests")]
+        //public void Reset()
+        //{
+        //    newObjects.Clear();
+        //    dirtyObjects.Clear();
+        //    removedObjects.Clear();
+        //}
     }
 
     static class MapperRegistry
     {
-        [ThreadStatic] 
-        private static readonly Dictionary<Type, IMapper<IEntity>> Registry;
+        [ThreadStatic]
+        private static readonly Dictionary<Type, IEntityMapper> Registry;
 
         static MapperRegistry()
         {
-            Registry = new Dictionary<Type, IMapper<IEntity>>(); 
+            Registry = new Dictionary<Type, IEntityMapper>();
         }
 
-        public static IMapper<IEntity> GetMapper(Type t)
+        public static IEntityMapper GetMapper(Type t)
         {
             return Registry[t];
         }
 
-        public static void RegisterMapper(Type t, IMapper<IEntity> modifications)
+        public static void RegisterMapper(Type t, IEntityMapper modifications)
         {
-            Registry.Add(t, modifications);
+            Registry[t] = modifications;
         }
     }
 }

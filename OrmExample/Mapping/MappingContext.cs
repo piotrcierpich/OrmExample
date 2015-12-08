@@ -25,5 +25,10 @@ namespace OrmExample.Mapping
         {
             return productMapper;
         }
+
+        public void SaveChanges()
+        {
+            UnitOfWork.Current.Commit();
+        }
     }
 }

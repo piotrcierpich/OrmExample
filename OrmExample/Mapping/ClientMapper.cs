@@ -11,6 +11,7 @@ namespace OrmExample.Mapping
         public ClientMapper(string connectionString)
         {
             mapper = new EntityMapper(connectionString, new ClientMapping());
+            MapperRegistry.RegisterMapper(typeof(Client), mapper);
         }
 
         public Client GetById(int id)
@@ -25,7 +26,8 @@ namespace OrmExample.Mapping
 
         public void Insert(Client entity)
         {
-            mapper.Insert(entity);
+            UnitOfWork.Current.RegisterNew(entity);
+            //mapper.Insert(entity);
         }
 
         public void Update(Client entity)

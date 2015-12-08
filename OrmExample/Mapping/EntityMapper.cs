@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OrmExample.Mapping
 {
-    public class EntityMapper
+    public class EntityMapper : IEntityMapper
     {
         private const string QueryByIdTemplate = "SELECT {0} FROM {1} WHERE Id = @Id";
         private const string GetAllQueryTemplate = "SELECT {0} FROM {1}";
@@ -23,6 +23,7 @@ namespace OrmExample.Mapping
             this.connectionString = connectionString;
             this.mapping = mapping;
         }
+
 
         public IEntity GetById(int id)
         {
