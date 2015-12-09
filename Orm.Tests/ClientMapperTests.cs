@@ -116,7 +116,7 @@ namespace Orm.Tests
         }
 
         [Test]
-        public void ShouldGetWhatsInserted()
+        public void ShouldInsertDataOnSaveChanges()
         {
             //given
             Client client = new Client
@@ -128,6 +128,13 @@ namespace Orm.Tests
             sut.GetClientMapper().Insert(client);
             sut.SaveChanges();
             //expect
+            Client clientInDb = ReadClientFromDb();
+            Assert.AreEqual("Jack Daniels", clientInDb.Name);
+            Assert.AreEqual("Rynek 5, Krakow", clientInDb.Address);
+        }
+
+        private Client ReadClientFromDb()
+        {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -136,16 +143,30 @@ namespace Orm.Tests
                 if (dr.Read())
                 {
                     string name = dr.GetString(0);
-                    Assert.AreEqual("Jack Daniels", name);
                     string address = dr.GetString(1);
-                    Assert.AreEqual("Rynek 5, Krakow", address);
+                    return new Client
+                        {
+                            Address = address,
+                            Name = name
+                        };
                 }
                 else
                 {
                     Assert.Fail("No data found");
+                    return null;
                 }
-                dr.Close();
             }
+        }
+
+        [Test]
+        public void ShouldSaveModifications()
+        {
+            int clientId = InsertClient();
+            Client client =  sut.GetClientMapper().GetById(clientId);
+            client.Name += " II";
+            sut.SaveChanges();
+            Client clientInDb = ReadClientFromDb();
+            StringAssert.EndsWith(" II", clientInDb.Name); 
         }
 
         private int InsertClient()
