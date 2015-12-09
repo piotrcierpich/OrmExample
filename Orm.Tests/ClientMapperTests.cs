@@ -78,14 +78,7 @@ namespace Orm.Tests
             sut.GetClientMapper().Insert(newClient);
             sut.SaveChanges();
             sut.SaveChanges();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM CLIENTS", connection);
-                int rowsCount = (int)command.ExecuteScalar();
-                Assert.AreEqual(1, rowsCount);
-            }
+            Assert.AreEqual(1, GetClientsCount());
         }
 
         [Test]
@@ -169,6 +162,14 @@ namespace Orm.Tests
             StringAssert.EndsWith(" II", clientInDb.Name); 
         }
 
+        [Test]
+        public void ShouldRemoveFromDbbWhenSaveDeleted()
+        {
+            int clientId = InsertClient();
+            sut.GetClientMapper().DeleteById(clientId);
+            Assert.AreEqual(0, GetClientsCount());
+        }
+
         private int InsertClient()
         {
             int insertedId;
@@ -180,6 +181,16 @@ namespace Orm.Tests
                 insertedId = (int)insertCommand.ExecuteScalar();
             }
             return insertedId;
+        }
+
+        private int GetClientsCount()
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM CLIENTS", connection);
+                return (int)command.ExecuteScalar();
+            }
         }
     }
 }
