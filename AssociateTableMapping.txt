@@ -1,0 +1,491 @@
+Association Table Mapping
+Saves an association as a table with foreign keys to the tables that are linked by the association.
+Image
+Image
+ 
+Objects can handle multivalued fields quite easily by using collections as field values. Relational databases don’t have this feature and are constrained to single-valued fields only. When you’re mapping a one-to-many association you can handle this using Foreign Key Mapping (236), essentially using a foreign key for the single-valued end of the association. But a many-to-many association can’t do this because there is no single-valued end to hold the foreign key.
+The answer is the classic resolution that’s been used by relational data people for decades: create an extra table to record the relationship. Then use Association Table Mapping to map the multivalued field to this link table.
+How It Works
+The basic idea behind Association Table Mapping is using a link table to store the association. This table has only the foreign key IDs for the two tables that are linked together, it has one row for each pair of associated objects.
+The link table has no corresponding in-memory object. As a result it has no ID. Its primary key is the compound of the two primary keys of the tables that are associated.
+In simple terms, to load data from the link table you perform two queries. Consider loading the skills for an employee. In this case, at least conceptually, you do queries in two stages. The first stage queries the skillsEmployees table to find all the rows that link to the employee you want. The second stage finds the skill object for the related ID for each row in the link table.
+If all the information is already in memory, this scheme works fine. If it isn’t, this scheme can be horribly expensive in queries, since you do a query for each skill that’s in the link table. You can avoid this cost by joining the skills table to the link table, which allows you to get all the data in a single query, albeit at the cost of making the mapping a bit more complicated.
+Updating the link data involves many of the issues in updating a many-valued field. Fortunately, the matter is made much easier since you can in many ways treat the link table like a Dependent Mapping (262). No other table should refer to the link table, so you can freely create and destroy links as you need them.
+When to Use It
+The canonical case for Association Table Mapping is a many-to-many association, since there are really no any alternatives for that situation.
+Association Table Mapping can also be used for any other form of association. However, because it’s more complex than Foreign Key Mapping (236) and involves an extra join, it’s not usually the right choice. Even so, in a couple of cases Association Table Mapping is appropriate for a simpler association; both involve databases where you have less control over the schema. Sometimes you may need to link two existing tables, but you aren’t able to add columns to those tables. In this case you can make a new table and use Association Table Mapping. Other times an existing schema uses an associative table, even when it isn’t really necessary. In this case it’s often easier to use Association Table Mapping than to simplify the database schema.
+In a relational database design you may often have association tables that also carry information about the relationship. An example is a person/company associative table that also contains information about a person’s employment with the company. In this case the person/company table really corresponds to a true domain object.
+Example: Employees and Skills (C#)
+Here’s a simple example using the sketch’s model. We have an employee class with a collection of skills, each of which can appear for more than one employee.
+Click here to view code image
+class Employee...
+
+      public IList Skills  {
+         get {return ArrayList.ReadOnly(skillsData);}
+         set {skillsData = new ArrayList(value);}
+      }
+      public void AddSkill  (Skill arg) {
+         skillsData.Add(arg);
+      }
+      public void RemoveSkill  (Skill arg) {
+         skillsData.Remove(arg);
+      }
+      private IList skillsData = new ArrayList();
+
+To load an employee from the database, we need to pull in the skills using an employee mapper. Each employee mapper class has a find method that creates an employee object. All mappers are subclasses of the abstract mapper class that pulls together common services for the mappers.
+Click here to view code image
+class EmployeeMapper...
+
+      public Employee Find(long id) {
+         return (Employee) AbstractFind(id);
+      }
+
+class AbstractMapper...
+
+      protected DomainObject AbstractFind(long id) {
+         Assert.True (id  != DomainObject.PLACEHOLDER_ID);
+         DataRow row = FindRow(id);
+         return (row == null)  ?  null : Load(row);
+      }
+      protected DataRow FindRow(long id) {
+         String filter = String.Format("id= {0}", id);
+         DataRow[] results = table.Select(filter);
+         return (results.Length == 0)  ?  null : results[0];
+      }
+      protected DataTable table {
+         get {return dsh.Data.Tables[TableName];}
+      }
+      public DataSetHolder dsh;
+      abstract protected String TableName {get;}
+class EmployeeMapper...
+
+      protected override String TableName {
+         get {return "Employees";}
+      }
+
+The data set holder is a simple object that contains an ADO.NET data set and the relevant adapters to save it to the database.
+Click here to view code image
+class DataSetHolder...
+
+      public DataSet Data = new DataSet();
+      private Hashtable DataAdapters = new Hashtable();
+
+To make this example simple—indeed, simplistic—we’ll assume that the data set has already been loaded with all the data we need.
+The find method calls load methods to load data for the employee.
+Click here to view code image
+class AbstractMapper...
+
+      protected DomainObject Load (DataRow row) {
+         long id= (int) row ["id"];
+         if (identityMap[id] != null) return (DomainObject) identityMap[id];
+         else {
+            DomainObject result = CreateDomainObject();
+            result.Id = id;
+            identityMap.Add(result.Id, result);
+            doLoad(result,row);
+            return result;
+         }
+      }
+      abstract protected DomainObject CreateDomainObject();
+      private IDictionary identityMap = new Hashtable();
+      abstract protected void doLoad (DomainObject obj, DataRow row);
+
+class EmployeeMapper...
+
+      protected override void doLoad (DomainObject obj, DataRow row) {
+         Employee emp = (Employee) obj;
+         emp.Name = (String) row["name"];
+         loadSkills(emp);
+      }
+
+Loading the skills is sufficiently awkward to demand a separate method to do the work.
+Click here to view code image
+class EmployeeMapper...
+
+      private IList loadSkills (Employee emp) {
+         DataRow[] rows = skillLinkRows(emp);
+         IList result = new ArrayList();
+         foreach (DataRow row in rows) {
+            long skillID = (int)row["skillID"];
+            emp.AddSkill(MapperRegistry.Skill.Find(skillID));
+         }
+         return result;
+      }
+      private DataRow[] skillLinkRows(Employee emp) {
+         String filter = String.Format("employeeID = {0}", emp.Id);
+         return skillLinkTable.Select(filter);
+      }
+      private DataTable skillLinkTable {
+         get {return dsh.Data.Tables["skillEmployees"];}
+      }
+
+To handle changes in skills information we use an update method on the abstract mapper.
+Click here to view code image
+class AbstractMapper...
+
+      public virtual void Update (DomainObject arg) {
+         Save (arg, FindRow(arg.Id));
+      }
+      abstract protected void Save (DomainObject arg, DataRow row);
+
+The update method calls a save method in the subclass.
+Click here to view code image
+class EmployeeMapper...
+
+      protected override void Save (DomainObject obj, DataRow row) {
+         Employee emp = (Employee) obj;
+         row["name"] = emp.Name;
+         saveSkills(emp);
+      }
+
+Again, I’ve made a separate method for saving the skills.
+Click here to view code image
+class EmployeeMapper...
+
+      private void saveSkills(Employee emp) {
+         deleteSkills(emp);
+         foreach (Skill s  in emp.Skills) {
+            DataRow row = skillLinkTable.NewRow();
+            row["employeeID"] = emp.Id;
+            row["skillID"] = s.Id;
+            skillLinkTable.Rows.Add(row);
+         }
+      }
+      private void deleteSkills(Employee emp) {
+         DataRow[] skillRows = skillLinkRows(emp);
+         foreach (DataRow r  in skillRows) r.Delete();
+      }
+
+The logic here does the simple thing of deleting all existing link table rows and creating new ones. This saves me having to figure out which ones have been added and deleted.
+Example: Using Direct SQL (Java)
+One of the nice things about ADO.NET is that it allows me to discuss the basics of an object-relational mapping without getting into the sticky details of minimizing queries. With other relational mapping schemes you’re closer to the SQL and have to take much of that into account.
+When you’re going directly to the database it’s important to minimize the queries. For my first version of this I’ll pull back the employee and all her skills in two queries. This is easy to follow but not quite optimal, so bear with me.
+Here’s the DDL for the tables:
+Click here to view code image
+create table employees (ID int primary key, firstname varchar, lastname varchar)
+create table skills (ID int primary key, name varchar)
+create table employeeSkills (employeeID int, skillID int, primary key (employeeID, skillID))
+
+To load a single Employee I’ll follow a similar approach to what I’ve done before. The employee mapper defines a simple wrapper for an abstract find method on the Layer Supertype (475).
+Click here to view code image
+class EmployeeMapper...
+
+   public Employee find(long key) {
+      return find (new Long  (key));
+   }
+   public Employee find (Long key) {
+      return (Employee) abstractFind(key);
+   }
+   protected String findStatement() {
+      return
+         "SELECT " + COLUMN_LIST +
+         "  FROM employees" +
+         "  WHERE  ID = ?";
+   }
+   public static final String COLUMN_LIST = " ID, lastname, firstname  ";
+
+class AbstractMapper...
+
+   protected DomainObject abstractFind(Long id) {
+      DomainObject result = (DomainObject) loadedMap.get(id);
+      if (result  != null) return result;
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+      try {
+         stmt = DB.prepare(findStatement());
+         stmt.setLong(1, id.longValue());
+         rs = stmt.executeQuery();
+         rs.next();
+         result = load(rs);
+         return result;
+      } catch (SQLException e) {
+         throw new ApplicationException(e);
+      } finally {DB.cleanUp(stmt, rs);
+      }
+   }
+   abstract protected String findStatement();
+   protected Map loadedMap = new HashMap();
+
+The find methods then call load methods. An abstract load method handles the ID loading while the actual data for the employee is loaded on the employee’s mapper.
+Click here to view code image
+class AbstractMapper...
+
+   protected DomainObject load(ResultSet rs) throws SQLException {
+      Long id= new Long(rs.getLong(1));
+      return load(id, rs);
+   }
+   public DomainObject load(Long id, ResultSet rs) throws SQLException {
+      if (hasLoaded(id)) return (DomainObject) loadedMap.get(id);
+      DomainObject result = doLoad(id, rs);
+      loadedMap.put(id, result);
+      return result;
+   }
+   abstract protected DomainObject doLoad(Long id, ResultSet rs) throws SQLException;
+
+class EmployeeMapper...
+
+   protected DomainObject doLoad(Long id, ResultSet rs) throws SQLException {
+      Employee result = new Employee(id);
+      result.setFirstName(rs.getString("firstname"));
+      result.setLastName(rs.getString("lastname"));
+      result.setSkills(loadSkills(id));
+      return result;
+   }
+
+The employee needs to issue another query to load the skills, but it can easily load all the skills in a single query. To do this it calls the skill mapper to load in the data for a particular skill.
+Click here to view code image
+class EmployeeMapper...
+
+   protected List loadSkills(Long employeeID) {
+         PreparedStatement stmt = null;
+         ResultSet rs = null;
+         try {
+            List result = new ArrayList();
+            stmt = DB.prepare(findSkillsStatement);
+            stmt.setObject(1, employeeID);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+               Long skillId = new Long  (rs.getLong(1));
+               result.add((Skill) MapperRegistry.skill().loadRow(skillId, rs));
+            }
+            return result;
+         } catch (SQLException e) {
+            throw new ApplicationException(e);
+         } finally {DB.cleanUp(stmt, rs);
+         }
+   }
+   private static final String findSkillsStatement =
+      "SELECT skill.ID, " + SkillMapper.COLUMN_LIST +
+      "  FROM skills skill, employeeSkills es " +
+      "  WHERE es.employeeID = ? AND skill.ID = es.skillID";
+
+class SkillMapper...
+
+   public static final String COLUMN_LIST = " skill.name skillName  ";
+
+class AbstractMapper...
+
+   protected DomainObject loadRow (Long id, ResultSet rs) throws SQLException {
+      return load (id, rs);
+   }
+
+class SkillMapper...
+
+   protected DomainObject doLoad(Long id, ResultSet rs) throws SQLException {
+      Skill result = new Skill  (id);
+      result.setName(rs.getString("skillName"));
+      return result;
+   }
+
+The abstract mapper can also help find employees.
+Click here to view code image
+class EmployeeMapper...
+
+   public List findAll() {
+      return findAll(findAllStatement);
+   }
+   private static final String findAllStatement =
+         "SELECT " + COLUMN_LIST +
+         "  FROM employees employee" +
+         "  ORDER BY employee.lastname";
+
+class AbstractMapper...
+
+   protected List findAll(String sql) {
+      PreparedStatement stmt = null;
+      ResultSet rs = null;
+      try {
+         List result = new ArrayList();
+         stmt = DB.prepare(sql);
+         rs = stmt.executeQuery();
+         while (rs.next())
+            result.add(load(rs));
+         return result;
+      } catch (SQLException e) {
+         throw new ApplicationException(e);
+      } finally {DB.cleanUp(stmt, rs);
+      }
+   }
+
+All of this works quite well and is pretty simple to follow. Still, there’s a problem in the number of queries, and that is that each employee takes two SQL queries to load. Although we can load the basic employee data for many employees in a single query, we still need one query per employee to load the skills. Thus, loading a hundred employees takes 101 queries.
+Example: Using a Single Query for Multiple Employees (Java)
+It’s possible to bring back many employees, with their skills, in a single query. This is a good example of multitable query optimization, which is certainly more awkward. For that reason do this when you need to, rather than every time. It’s better to put more energy into speeding up your slow queries than into many queries that are less important.
+The first case we’ll look at is a simple one where we pull back all the skills for an employee in the same query that holds the basic data. To do this I’ll use a more complex SQL statement that joins across all three tables.
+Click here to view code image
+class EmployeeMapper...
+
+   protected String findStatement() {
+      return
+         "SELECT" + COLUMN_LIST +
+         "  FROM employees employee, skills skill, employeeSkills es" +
+         "  WHERE employee.ID = es.employeeID AND skill.ID = es.skillID AND employee.ID = ?";
+   }
+   public static final String COLUMN_LIST =
+         " employee.ID, employee.lastname, employee.firstname, " +
+         "  es.skillID, es.employeeID, skill.ID skillID, " +
+            SkillMapper.COLUMN_LIST;
+
+The abstractFind and load methods on the superclass are the same as in the previous example, so I won’t repeat them here. The employee mapper loads its data differently to take advantage of the multiple data rows.
+Click here to view code image
+class EmployeeMapper...
+
+   protected DomainObject doLoad(Long id, ResultSet rs) throws SQLException {
+      Employee result = (Employee) loadRow(id, rs);
+      loadSkillData(result, rs);
+      while (rs.next()){
+         Assert.isTrue(rowIsForSameEmployee(id, rs));
+         loadSkillData(result, rs);
+      }
+      return result;
+   }
+   protected DomainObject loadRow(Long id, ResultSet rs) throws SQLException {
+      Employee result = new Employee(id);
+      result.setFirstName(rs.getString("firstname"));
+      result.setLastName(rs.getString("lastname"));
+      return result;
+   }
+   private boolean rowIsForSameEmployee(Long id, ResultSet rs) throws SQLException {
+      return id.equals(new Long(rs.getLong(1)));
+   }
+   private void loadSkillData(Employee person, ResultSet rs) throws SQLException {
+      Long skillID = new Long(rs.getLong("skillID"));
+      person.addSkill  ((Skill)MapperRegistry.skill().loadRow(skillID, rs));
+   }
+
+In this case the load method for the employee mapper actually runs through the rest of the result set to load in all the data.
+All is simple when we’re loading the data for a single employee. However, the real benefit of this multitable query appears when we want to load lots of employees. Getting the reading right can be tricky, particularly when we don’t want to force the result set to be grouped by employees. At this point it’s handy to introduce a helper class to go through the result set by focusing on the associative table itself, loading up the employees and skills as it goes along.
+I’ll begin with the SQL and the call to the special loader class.
+Click here to view code image
+class EmployeeMapper...
+
+   public List findAll() {
+      return findAll(findAllStatement);
+   }
+   private static final String findAllStatement =
+         "SELECT " + COLUMN_LIST +
+         "  FROM employees employee, skills skill, employeeSkills es" +
+         "  WHERE employee.ID = es.employeeID AND skill.ID = es.skillID" +
+         "  ORDER BY employee.lastname";
+   protected List findAll(String sql) {
+      AssociationTableLoader loader = new AssociationTableLoader(this, new SkillAdder());
+      return loader.run(findAllStatement);
+   }
+class AssociationTableLoader...
+
+   private AbstractMapper sourceMapper;
+   private Adder targetAdder;
+   public AssociationTableLoader(AbstractMapper primaryMapper, Adder targetAdder) {
+      this.sourceMapper = primaryMapper;
+      this.targetAdder = targetAdder;
+   }
+
+Don’t worry about the skillAdder—that will become a bit clearer later. For the moment notice that we construct the loader with a reference to the mapper and then tell it to perform a load with a suitable query. This is the typical structure of a method object. A method object [Beck Patterns] is a way of turning a complicated method into an object on its own. The great advantage of this is that it allows you to put values in fields instead of passing them around in parameters. The usual way of using a method object is to create it, fire it up, and then let it die once its duty is done.
+The load behavior comes in three steps.
+Click here to view code image
+class AssociationTableLoader...
+
+   protected List run(String sql) {
+      loadData(sql);
+      addAllNewObjectsToIdentityMap();
+      return formResult();
+   }
+
+The loadData method forms the SQL call, executes it, and loops through the result set. Since this is a method object, I’ve put the result set in a field so I don’t have to pass it around.
+Click here to view code image
+class AssociationTableLoader...
+
+   private ResultSet rs = null;
+   private void loadData(String sql) {
+      PreparedStatement stmt = null;
+      try {
+         stmt = DB.prepare(sql);
+         rs = stmt.executeQuery();
+         while (rs.next())
+            loadRow();
+      } catch (SQLException e) {
+         throw new ApplicationException(e);
+      } finally {DB.cleanUp(stmt, rs);
+      }
+   }
+
+The loadRow method loads the data from a single row in the result set. It’s a bit complicated.
+Click here to view code image
+class AssociationTableLoader...
+
+   private List resultIds = new ArrayList();
+   private Map inProgress = new HashMap();
+   private void loadRow() throws SQLException {
+      Long ID = new Long(rs.getLong(1));
+      if (!resultIds.contains(ID)) resultIds.add(ID);
+      if (!sourceMapper.hasLoaded(ID)) {
+         if (!inProgress.keySet().contains(ID))
+            inProgress.put(ID, sourceMapper.loadRow(ID, rs));
+         targetAdder.add((DomainObject) inProgress.get(ID), rs);
+      }
+   }
+
+class AbstractMapper...
+
+   boolean hasLoaded(Long id) {
+      return loadedMap.containsKey(id);
+   }
+
+The loader preserves any order there is in the result set, so the output list of employees will be in the same order in which it first appeared. So I keep a list of IDs in the order I see them. Once I’ve got the ID I look to see if it’s already fully loaded in the mapper—usually from a previous query. If it not I load what data I have and keep it in an in-progress list. I need such a list since several rows will combine to gather all the data from the employee and I may not hit those rows consecutively.
+The trickiest part to this code is ensuring that I can add the skill I’m loading to the employees’ list of skills, but still keep the loader generic so it doesn’t depend on employees and skills. To achieve this I need to dig deep into my bag of tricks to find an inner interface—the Adder.
+Click here to view code image
+class AssociationTableLoader...
+
+   public static interface Adder  {
+      void add(DomainObject host, ResultSet rs) throws SQLException  ;
+   }
+
+The original caller has to supply an implementation for the interface to bind it to the particular needs of the employee and skill.
+Click here to view code image
+class EmployeeMapper...
+
+   private static class SkillAdder implements AssociationTableLoader.Adder  {
+      public void add(DomainObject host, ResultSet rs) throws SQLException {
+         Employee emp = (Employee) host;
+         Long skillId = new Long (rs.getLong("skillId"));
+         emp.addSkill((Skill) MapperRegistry.skill().loadRow(skillId, rs));
+      }
+   }
+
+This is the kind of thing that comes more naturally to languages that have function pointers or closures, but at least the class and interface get the job done. (They don’t have to be inner in this case, but it helps bring out their narrow scope.)
+You may have noticed that I have a load and a loadRow method defined on the superclass and the implementation of the loadRow is to call load. I did this because there are times when you want to be sure that a load action will not move the result set forward. The load does whatever it needs to do to load an object, but loadRow guarantees to load data from a row without altering the position of the cursor. Most of the time these two are the same thing, but in the case of this employee mapper they’re different.
+Now all the data is in from the result set. I have two collections: a list of all the employee IDs that were in the result set in the order of first appearance and a list of new objects that haven’t yet made an appearance in the employee mapper’s Identity Map (195).
+The next step is to put all the new objects into the Identity Map (195).
+Click here to view code image
+class AssociationTableLoader...
+
+   private void addAllNewObjectsToIdentityMap() {
+      for (Iterator it = inProgress.values().iterator(); it.hasNext();)
+         sourceMapper.putAsLoaded((DomainObject)it.next());
+   }
+
+class AbstractMapper...
+
+   void putAsLoaded (DomainObject obj) {
+      loadedMap.put (obj.getID(), obj);
+   }
+
+The final step is to assemble the result list by looking up the IDs from the mapper.
+Click here to view code image
+class AssociationTableLoader...
+
+   private List formResult() {
+      List result = new ArrayList();
+      for (Iterator it = resultIds.iterator(); it.hasNext();) {
+         Long id= (Long)it.next();
+         result.add(sourceMapper.lookUp(id));
+      }
+      return result;
+   }
+
+class AbstractMapper...
+
+   protected DomainObject lookUp  (Long id) {
+      return (DomainObject) loadedMap.get(id);
+   }
+
+Such code is more complex than the average loading code, but this kind of thing can help cut down the number of queries. Since it’s complicated, this is something to be used sparingly when you have laggardly bits of database interaction. However, it’s an example of how Data Mapper (165) can provide good queries without the domain layer being aware of the complexity involved.

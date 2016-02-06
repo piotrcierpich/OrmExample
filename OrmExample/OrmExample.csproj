@@ -55,15 +55,15 @@
     <Compile Include="Entities\PromoDay.cs" />
     <Compile Include="Mapping\ClientMapper.cs" />
     <Compile Include="Mapping\ClientMapping.cs" />
-    <Compile Include="Mapping\DsRetriever.cs" />
-    <Compile Include="Mapping\EntityMapper.cs" />
-    <Compile Include="Mapping\IEntityMapper.cs" />
+    <Compile Include="Mapping\Infrastructure\EntityMapper.cs" />
+    <Compile Include="Mapping\Infrastructure\IEntityMapper.cs" />
     <Compile Include="Mapping\IMapper.cs" />
     <Compile Include="Mapping\IMapping.cs" />
+    <Compile Include="Mapping\Infrastructure\MapperRegistry.cs" />
     <Compile Include="Mapping\MappingContext.cs" />
     <Compile Include="Mapping\ProductMapper.cs" />
     <Compile Include="Mapping\ProductMapping.cs" />
-    <Compile Include="Mapping\UnitOfWork.cs" />
+    <Compile Include="Mapping\Infrastructure\UnitOfWork.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

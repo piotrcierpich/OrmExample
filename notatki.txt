@@ -1,0 +1,1 @@
+- Unit of work umozliwia SaveChanges - opozniony zapis zmian wprowadzanych do bazy w ramach jednej transakcji
