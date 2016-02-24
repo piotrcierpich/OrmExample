@@ -11,6 +11,7 @@ namespace OrmExample.Mapping
         public ProductMapper(string connectionString)
         {
             mapper = new EntityMapper(connectionString, new ProductMapping());
+            MapperRegistry.RegisterMapper(typeof(Product), mapper);
         }
 
         public Product GetById(int id)

@@ -7,6 +7,11 @@ namespace OrmExample.Entities
         private string name;
         private decimal price;
 
+        public override int GetHashCode()
+        {
+            return Id;
+        }
+
         public override bool Equals(object obj)
         {
             Product other = obj as Product;

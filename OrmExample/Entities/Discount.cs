@@ -1,14 +1,35 @@
-﻿namespace OrmExample.Entities
+﻿using OrmExample.Mapping;
+
+namespace OrmExample.Entities
 {
-    public class Discount
+    public class Discount : EntityInUow
     {
+        private Product product;
+        private IDiscountPolicy discountPolicy;
+
         public decimal GetDiscountedPrice()
         {
             return DiscountPolicy.CalculateDiscountedPrice(Product.Price);
         }
 
-        public int Id { get; set; }
-        public Product Product { get; set; }
-        public IDiscountPolicy DiscountPolicy { get; set; }
+        public Product Product
+        {
+            get { return product; }
+            set
+            {
+                product = value;
+                MarkDirty();
+            }
+        }
+
+        public IDiscountPolicy DiscountPolicy
+        {
+            get { return discountPolicy; }
+            set
+            {
+                discountPolicy = value;
+                MarkDirty();
+            }
+        }
     }
 }

@@ -55,6 +55,8 @@
     <Compile Include="Entities\PromoDay.cs" />
     <Compile Include="Mapping\ClientMapper.cs" />
     <Compile Include="Mapping\ClientMapping.cs" />
+    <Compile Include="Mapping\DiscountMapper.cs" />
+    <Compile Include="Mapping\DiscountMapping.cs" />
     <Compile Include="Mapping\Infrastructure\EntityMapper.cs" />
     <Compile Include="Mapping\Infrastructure\IEntityMapper.cs" />
     <Compile Include="Mapping\IMapper.cs" />

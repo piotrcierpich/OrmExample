@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using OrmExample;
 using OrmExample.Entities;
@@ -11,10 +12,12 @@ namespace EntityFrameworkExample
     {
         static void Main(string[] args)
         {
+            Database.SetInitializer(new DropCreateDatabaseAlways<PromoContext>());
+
             Product rocketFuel = new Product { Name = "Rocket fuel", Price = 25.0m };
             Product doubleBlast = new Product { Name = "Double blast", Price = 40.0m };
             Product tripleBlast = new Product { Name = "Triple blast", Price = 40.0m };
-            
+
             PromoContext dbContext = new PromoContext();
 
             IEnumerable<Product> products = dbContext.Products.ToArray();
@@ -50,7 +53,16 @@ namespace EntityFrameworkExample
 
             dbContext.Clients.Add(regularClient);
             dbContext.Clients.Add(josephDeer);
+
+            Discount discount = new Discount { Product = new Product { Name = "discounted product", Price = 12.0m } };
+            dbContext.Discounts.Add(discount);
             dbContext.SaveChanges();
+            int relatedProductId = discount.Product.Id;
+            Discount insertedDiscount = dbContext.Discounts.Single(d => d.Id == discount.Id);
+            dbContext.Discounts.Remove(insertedDiscount);
+            dbContext.SaveChanges();
+            Product releatedProduct = dbContext.Products.Single(p => p.Id == relatedProductId);
+            insertedDiscount = dbContext.Discounts.Single(d => d.Id == discount.Id);
         }
     }
 
@@ -63,6 +75,7 @@ namespace EntityFrameworkExample
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            //modelBuilder.Configurations.Add(new )
             modelBuilder.Entity<Product>().HasKey(p => p.Id);
             modelBuilder.Entity<Client>().HasKey(c => c.Id);
             modelBuilder.Entity<Discount>().HasKey(d => d.Id);
@@ -70,5 +83,6 @@ namespace EntityFrameworkExample
 
         public DbSet<Client> Clients { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
     }
 }

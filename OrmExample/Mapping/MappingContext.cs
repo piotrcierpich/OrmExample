@@ -8,12 +8,14 @@ namespace OrmExample.Mapping
     {
         private readonly ClientMapper clientMapper;
         private readonly ProductMapper productMapper;
+        private readonly DiscountMapper discountMapper;
 
         public MappingContext(string connectionStringName)
         {
             string connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
             clientMapper = new ClientMapper(connectionString);
             productMapper = new ProductMapper(connectionString);
+            discountMapper = new DiscountMapper(connectionString);
         }
 
         public IMapper<Client> GetClientMapper()
@@ -29,6 +31,11 @@ namespace OrmExample.Mapping
         public void SaveChanges()
         {
             UnitOfWork.Current.Commit();
+        }
+
+        public IMapper<Discount> GetDiscountsMapper()
+        {
+            return discountMapper;
         }
     }
 }
