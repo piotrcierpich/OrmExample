@@ -1,8 +1,8 @@
 ﻿namespace OrmExample.Entities
 {
-    public class DiscountUntilCancelled : IDiscountPolicy
+    public class DiscountUntilCancelled : DiscountPolicyBase
     {
-        public decimal CalculateDiscountedPrice(decimal originalPrice)
+        public override decimal CalculateDiscountedPrice(decimal originalPrice)
         {
             if (Cancelled)
                 return originalPrice;
@@ -10,7 +10,6 @@
             return DiscountPercentage.Subtract(originalPrice);
         }
 
-        public Percentage DiscountPercentage { get; set; }
         public bool Cancelled { get; set; }
     }
 }

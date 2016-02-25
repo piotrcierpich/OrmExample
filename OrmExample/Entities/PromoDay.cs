@@ -2,9 +2,9 @@
 
 namespace OrmExample.Entities
 {
-    public class PromoDay : IDiscountPolicy
+    public class PromoDay : DiscountPolicyBase
     {
-        public decimal CalculateDiscountedPrice(decimal originalPrice)
+        public override decimal CalculateDiscountedPrice(decimal originalPrice)
         {
             if (IsThisToday())
                 return DiscountPercentage.Subtract(originalPrice);
@@ -17,7 +17,6 @@ namespace OrmExample.Entities
             return DateTime.Today == DayDate.Date;
         }
 
-        public Percentage DiscountPercentage { get; set; }
         public DateTime DayDate { get; set; }
     }
 }

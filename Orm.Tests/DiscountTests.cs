@@ -55,11 +55,11 @@ namespace Orm.Tests
         public void DiscountShouldBeSavedWithIdOfRelatedProduct()
         {
             Product p = new Product { Name = "Oil", Price = 89.0m };
-            mappingContext.GetProductMapper().Insert(p);
+            mappingContext.ProductMapper.Insert(p);
             mappingContext.SaveChanges();
             int expectedProductId = p.Id;
             Discount d = new Discount { Product = p };
-            mappingContext.GetDiscountsMapper().Insert(d);
+            mappingContext.DiscountsMapper.Insert(d);
             mappingContext.SaveChanges();
             int discountId = d.Id;
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -79,7 +79,7 @@ namespace Orm.Tests
         {
             Product relatedProduct = new Product { Name = "Oil", Price = 89.0m };
             Discount discount = new Discount { Product = relatedProduct };
-            mappingContext.GetDiscountsMapper().Insert(discount);
+            mappingContext.DiscountsMapper.Insert(discount);
             mappingContext.SaveChanges();
             int expectedRelatedProductId = relatedProduct.Id;
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -97,13 +97,13 @@ namespace Orm.Tests
         public void DiscountShouldGetRelatedProduct()
         {
             Product discountedProduct = new Product { Name = "Oil", Price = 89.0m };
-            mappingContext.GetProductMapper().Insert(discountedProduct);
+            mappingContext.ProductMapper.Insert(discountedProduct);
             mappingContext.SaveChanges();
             Discount discount = new Discount { Product = discountedProduct };
-            mappingContext.GetDiscountsMapper().Insert(discount);
+            mappingContext.DiscountsMapper.Insert(discount);
             mappingContext.SaveChanges();
             int idToGet = discount.Id;
-            Discount sut = new MappingContext(ConnectionStringName).GetDiscountsMapper().GetById(idToGet);
+            Discount sut = new MappingContext(ConnectionStringName).DiscountsMapper.GetById(idToGet);
             Assert.AreEqual(discountedProduct.Id, sut.Product.Id);
         }
     }

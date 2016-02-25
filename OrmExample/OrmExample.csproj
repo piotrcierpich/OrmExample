@@ -45,6 +45,7 @@
     <Compile Include="Entities\Client.cs" />
     <Compile Include="Entities\DateSpan.cs" />
     <Compile Include="Entities\Discount.cs" />
+    <Compile Include="Entities\DiscountPolicyBase.cs" />
     <Compile Include="Entities\DiscountUntilCancelled.cs" />
     <Compile Include="Entities\DiscountUntilExpired.cs" />
     <Compile Include="Entities\EntityInUow.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="Mapping\ClientMapping.cs" />
     <Compile Include="Mapping\DiscountMapper.cs" />
     <Compile Include="Mapping\DiscountMapping.cs" />
+    <Compile Include="Mapping\DiscountPoliciesMapper.cs" />
     <Compile Include="Mapping\Infrastructure\EntityMapper.cs" />
     <Compile Include="Mapping\Infrastructure\IEntityMapper.cs" />
     <Compile Include="Mapping\IMapper.cs" />

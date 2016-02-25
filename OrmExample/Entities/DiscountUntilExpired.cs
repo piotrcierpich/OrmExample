@@ -2,9 +2,9 @@
 
 namespace OrmExample.Entities
 {
-    public class DiscountUntilExpired : IDiscountPolicy
+    public class DiscountUntilExpired : DiscountPolicyBase
     {
-        public decimal CalculateDiscountedPrice(decimal originalPrice)
+        public override decimal CalculateDiscountedPrice(decimal originalPrice)
         {
             if (IsDiscountTime())
             {
@@ -18,7 +18,6 @@ namespace OrmExample.Entities
             return FromTo.Encloses(DateTime.Now) == false;
         }
 
-        public Percentage DiscountPercentage { get; set; }
         public DateSpan FromTo { get; set; }
     }
 }

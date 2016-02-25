@@ -76,77 +76,77 @@ namespace OrmExample
         private static void TestProductsGet()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            IEnumerable<Product> allProducts = mappingContext.GetProductMapper().GetAll();
+            IEnumerable<Product> allProducts = mappingContext.ProductMapper.GetAll();
         }
 
         private static void TestProductInsert()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
             Product kryptonite = new Product {Name = "Next generation blast", Price = 999.0m};
-            mappingContext.GetProductMapper().Insert(kryptonite);
+            mappingContext.ProductMapper.Insert(kryptonite);
         }
 
         private static void TestProductUpdate()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            Product product = mappingContext.GetProductMapper().GetById(2);
+            Product product = mappingContext.ProductMapper.GetById(2);
             product.Name += " improved!";
-            mappingContext.GetProductMapper().Update(product);
+            mappingContext.ProductMapper.Update(product);
         }
 
         private static void TestClientInsert()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
             Client newClient = new Client {Name = "John malkovic", Address = "NY Brooklyn"};
-            mappingContext.GetClientMapper().Insert(newClient);
+            mappingContext.ClientMapper.Insert(newClient);
         }
 
         private static void TestClientUpdate()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            Client clientToUpdate = mappingContext.GetClientMapper().GetById(5);
+            Client clientToUpdate = mappingContext.ClientMapper.GetById(5);
             clientToUpdate.Name += " what?";
-            mappingContext.GetClientMapper().Update(clientToUpdate);
+            mappingContext.ClientMapper.Update(clientToUpdate);
         }
 
         private static void TestGetClients()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            Client client = mappingContext.GetClientMapper().GetById(2);
-            IEnumerable<Client> clients = mappingContext.GetClientMapper().GetAll();
+            Client client = mappingContext.ClientMapper.GetById(2);
+            IEnumerable<Client> clients = mappingContext.ClientMapper.GetAll();
         }
 
         private static void TestUow()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            Client c1 = mappingContext.GetClientMapper().GetById(1);
+            Client c1 = mappingContext.ClientMapper.GetById(1);
             c1.Name += "UOW modified";
             mappingContext.SaveChanges();
-            Client c2 = mappingContext.GetClientMapper().GetById(1);
+            Client c2 = mappingContext.ClientMapper.GetById(1);
             Debug.Assert(c2.Name.Contains("UOW modified"));
         }
 
         private static void TestDelete()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
-            var productAt3 = mappingContext.GetProductMapper().GetAll().Skip(2).First();
+            var productAt3 = mappingContext.ProductMapper.GetAll().Skip(2).First();
             //mappingContext.GetClientMapper().DeleteById(productAt3.Id);
-            mappingContext.GetClientMapper().DeleteById(10);
-            var all = mappingContext.GetClientMapper().GetAll();
+            mappingContext.ClientMapper.DeleteById(10);
+            var all = mappingContext.ClientMapper.GetAll();
         }
 
         private static void TestIdentityMap()
         {
             MappingContext mappingContext = new MappingContext("ormExample");
             Client autocenter = new Client() {Address = "Garncarska 13 Krakow", Name = "Auto center"};
-            mappingContext.GetClientMapper().Insert(autocenter);
+            mappingContext.ClientMapper.Insert(autocenter);
             mappingContext.SaveChanges();
             // TODO cannot use ID as the entity has not been inserted yet maybe mappingContext.SaveChanged()
-            Client autoCenterFromDb = mappingContext.GetClientMapper().GetById(autocenter.Id);
+            Client autoCenterFromDb = mappingContext.ClientMapper.GetById(autocenter.Id);
             Debug.Assert(autoCenterFromDb.GetHashCode() == autocenter.GetHashCode(), "identity map fails");
 
-            Client firstClientAt3 = mappingContext.GetClientMapper().GetById(2);
-            Client secondClientAt3 = mappingContext.GetClientMapper().GetById(2);
+            Client firstClientAt3 = mappingContext.ClientMapper.GetById(2);
+            Client secondClientAt3 = mappingContext.ClientMapper.GetById(2);
             Debug.Assert(firstClientAt3.GetHashCode() == secondClientAt3.GetHashCode(), "identity map fails");
         }
     }

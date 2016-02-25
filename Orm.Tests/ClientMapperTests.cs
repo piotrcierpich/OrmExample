@@ -61,7 +61,7 @@ namespace Orm.Tests
                     Name = "Johnny Bravo",
                     Address = "Czerwone Maki 84, Krakow"
                 };
-            sut.GetClientMapper().Insert(newClient);
+            sut.ClientMapper.Insert(newClient);
             Assert.AreEqual(0, newClient.Id);
             sut.SaveChanges();
             Assert.AreNotEqual(0, newClient.Id);
@@ -75,7 +75,7 @@ namespace Orm.Tests
                 Name = "Johnny Bravo",
                 Address = "Czerwone Maki 84, Krakow"
             };
-            sut.GetClientMapper().Insert(newClient);
+            sut.ClientMapper.Insert(newClient);
             sut.SaveChanges();
             sut.SaveChanges();
             Assert.AreEqual(1, GetClientsCount());
@@ -85,7 +85,7 @@ namespace Orm.Tests
         public void GetAllShouldGetAndMapFromDb()
         {
             InsertClient();
-            Client[] allClients = sut.GetClientMapper().GetAll().ToArray();
+            Client[] allClients = sut.ClientMapper.GetAll().ToArray();
             Assert.AreEqual("John Doe", allClients[0].Name);
             Assert.AreEqual("Czerwone Maki 84 Krakow", allClients[0].Address);
         }
@@ -94,7 +94,7 @@ namespace Orm.Tests
         public void GetShouldGetAndMapFromDb()
         {
             int insertedId = InsertClient();
-            Client insertedClient = sut.GetClientMapper().GetById(insertedId);
+            Client insertedClient = sut.ClientMapper.GetById(insertedId);
             Assert.AreEqual("John Doe", insertedClient.Name);
             Assert.AreEqual("Czerwone Maki 84 Krakow", insertedClient.Address);
         }
@@ -103,8 +103,8 @@ namespace Orm.Tests
         public void ShouldNotQueryTwiceForTheSameClientId()
         {
             int clientId = InsertClient();
-            Client client1 = sut.GetClientMapper().GetById(clientId);
-            Client client2 = sut.GetClientMapper().GetById(clientId);
+            Client client1 = sut.ClientMapper.GetById(clientId);
+            Client client2 = sut.ClientMapper.GetById(clientId);
             Assert.IsTrue(ReferenceEquals(client1, client2));
         }
 
@@ -118,7 +118,7 @@ namespace Orm.Tests
                     Address = "Rynek 5, Krakow"
                 };
             //when
-            sut.GetClientMapper().Insert(client);
+            sut.ClientMapper.Insert(client);
             sut.SaveChanges();
             //expect
             Client clientInDb = ReadClientFromDb();
@@ -155,7 +155,7 @@ namespace Orm.Tests
         public void ShouldSaveModifications()
         {
             int clientId = InsertClient();
-            Client client =  sut.GetClientMapper().GetById(clientId);
+            Client client = sut.ClientMapper.GetById(clientId);
             client.Name += " II";
             sut.SaveChanges();
             Client clientInDb = ReadClientFromDb();
@@ -166,7 +166,7 @@ namespace Orm.Tests
         public void ShouldRemoveFromDbbWhenSaveDeleted()
         {
             int clientId = InsertClient();
-            sut.GetClientMapper().DeleteById(clientId);
+            sut.ClientMapper.DeleteById(clientId);
             Assert.AreEqual(0, GetClientsCount());
         }
 
