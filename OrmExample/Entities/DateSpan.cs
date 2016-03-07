@@ -2,7 +2,7 @@
 
 namespace OrmExample.Entities
 {
-    public class DateSpan
+    public struct DateSpan
     {
         public bool Encloses(DateTime dateTime)
         {

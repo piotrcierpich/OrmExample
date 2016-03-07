@@ -1,38 +1,44 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
 using OrmExample.Entities;
 
 namespace OrmExample.Mapping
 {
     public class DiscountPoliciesMapper : IMapper<DiscountPolicyBase>
     {
+        private readonly EntityMapper entityMapper;
+
         public DiscountPoliciesMapper(string connectionString)
         {
-            throw new System.NotImplementedException();
+            entityMapper = new EntityMapper(connectionString, new DiscountPolicyMapping());
         }
 
         public DiscountPolicyBase GetById(int id)
         {
-            throw new System.NotImplementedException();
+            return (DiscountPolicyBase)entityMapper.GetById(id);
         }
 
         public IEnumerable<DiscountPolicyBase> GetAll()
         {
-            throw new System.NotImplementedException();
+            return entityMapper.GetAll().Cast<DiscountPolicyBase>();
         }
 
         public void Insert(DiscountPolicyBase entity)
         {
-            throw new System.NotImplementedException();
+            entityMapper.Insert(entity);
         }
 
         public void Update(DiscountPolicyBase entity)
         {
-            throw new System.NotImplementedException();
+            entityMapper.Update(entity);
         }
 
         public void DeleteById(int id)
         {
-            throw new System.NotImplementedException();
+            entityMapper.DeleteById(id);
         }
     }
 }
